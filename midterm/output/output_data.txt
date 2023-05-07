@@ -1,0 +1,64 @@
+KNN algorithm in labA with data balance repeat 100 times
+1. original data
+average accuracy: 80.65% / max accuracy: 80.65%
+2. Min-Max normalization
+average accuracy: 83.87% / max accuracy: 83.87%
+3. Z-score standard
+average accuracy: 88.71% / max accuracy: 88.71%
+===========================================================================
+KNN algorithm in labB with data balance repeat 100 times
+1. original data
+average accuracy: 80.43% / max accuracy: 80.43%
+2. Min-Max normalization
+average accuracy: 78.26% / max accuracy: 78.26%
+3. Z-score standard
+average accuracy: 80.43% / max accuracy: 80.43%
+===========================================================================
+RandomForest algorithm in labA with data balance repeat 100 times
+1. original data
+average accuracy: 80.68% / max accuracy: 88.24%
+2. Min-Max normalization
+average accuracy: 75.18% / max accuracy: 80.15%
+3. Z-score standard
+average accuracy: 80.39% / max accuracy: 87.50%
+===========================================================================
+RandomForest algorithm in labB with data balance repeat 100 times
+1. original data
+average accuracy: 74.33% / max accuracy: 82.76%
+2. Min-Max normalization
+average accuracy: 74.60% / max accuracy: 84.48%
+3. Z-score standard
+average accuracy: 73.90% / max accuracy: 82.76%
+===========================================================================
+KNN algorithm in labA without data balance repeat 100 times
+1. original data
+average accuracy: 81.82% / max accuracy: 81.82%
+2. Min-Max normalization
+average accuracy: 84.85% / max accuracy: 84.85%
+3. Z-score standard
+average accuracy: 84.85% / max accuracy: 84.85%
+===========================================================================
+KNN algorithm in labB without data balance repeat 100 times
+1. original data
+average accuracy: 76.92% / max accuracy: 76.92%
+2. Min-Max normalization
+average accuracy: 78.85% / max accuracy: 78.85%
+3. Z-score standard
+average accuracy: 75.00% / max accuracy: 75.00%
+===========================================================================
+RandomForest algorithm in labA without data balance repeat 100 times
+1. original data
+average accuracy: 82.85% / max accuracy: 86.87%
+2. Min-Max normalization
+average accuracy: 73.53% / max accuracy: 78.79%
+3. Z-score standard
+average accuracy: 83.39% / max accuracy: 85.86%
+===========================================================================
+RandomForest algorithm in labB without data balance repeat 100 times
+1. original data
+average accuracy: 75.23% / max accuracy: 80.77%
+2. Min-Max normalization
+average accuracy: 76.87% / max accuracy: 86.54%
+3. Z-score standard
+average accuracy: 76.46% / max accuracy: 80.77%
+===========================================================================
