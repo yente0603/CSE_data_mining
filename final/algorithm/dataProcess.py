@@ -10,17 +10,32 @@ def excutePCA(X, n_components=2):
 
 def loadFile(path):
     train_data = np.genfromtxt(path + 'train_data.csv', delimiter=',')
-    test_data = np.genfromtxt(path + 'train_data.csv', delimiter=',')
+    test_data = np.genfromtxt(path + 'test_data.csv', delimiter=',')
     train_label = np.genfromtxt(path + 'train_label.csv', delimiter=',')
-    test_label = np.genfromtxt(path + 'train_label.csv', delimiter=',')
+    test_label = np.genfromtxt(path + 'test_label.csv', delimiter=',')
     return train_data, test_data, train_label, test_label
 
-def dataClean(train_data, test_data):
-    clean_idx = [1, 2, 3, 4, 5, 7]
-    for i in clean_idx:
-        train_data = np.delete(train_data, np.where(train_data[:, i] == 0.0)[0], axis=0)
-        test_data = np.delete(test_data, np.where(test_data[:, i] == 0.0)[0], axis=0)
-    return train_data, test_data
+def dataClean(data):
+    # missing value
+    ratio = 0.1
+    train_missing = np.where(np.isnan(data[0]))
+    missing_index = np.where(np.bincount(train_missing[1])>=data[0].shape[0]*ratio)[0]
+    for i in reversed(missing_index):
+        for j in range(2):
+            data[j] = np.delete(data[j], i, axis=1)
+    for i in range(2):
+        missing_value = np.where(np.isnan(data[i]))[0]
+        for j in reversed(missing_value):
+            for k in range(2):
+                data[i+k*2] = np.delete(data[i+k*2], j, axis=0)
+
+    # outlier value
+    for i in reversed([0, 2, 3]): #age, Height, Weight
+        for j in range(2):
+            outlier = np.where(data[j][:, i] == 0.0)[0]
+            data[j] = np.delete(data[j], outlier, axis=0)
+            data[j+2] = np.delete(data[j+2], outlier, axis=0)
+    return data
 
 def dataBalance(train_data, test_data, sample_type):
     """
