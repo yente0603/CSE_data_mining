@@ -3,12 +3,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 from sklearn.decomposition import PCA # only for reduce dimension
-
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import normalize, StandardScaler
 def excutePCA(X, n_components=2):
     pca = PCA(n_components=n_components)
     return pca.fit_transform(X)
 
 def loadFile(path):
+    # train_data = np.genfromtxt(path + 'train_data.csv', delimiter=',')[:, :15]
     train_data = np.genfromtxt(path + 'train_data.csv', delimiter=',')
     test_data = np.genfromtxt(path + 'test_data.csv', delimiter=',')
     train_label = np.genfromtxt(path + 'train_label.csv', delimiter=',')
@@ -17,24 +19,64 @@ def loadFile(path):
 
 def dataClean(data):
     # missing value
-    ratio = 0.1
+    ratio = 0.4
     train_missing = np.where(np.isnan(data[0]))
     missing_index = np.where(np.bincount(train_missing[1])>=data[0].shape[0]*ratio)[0]
     for i in reversed(missing_index):
         for j in range(2):
             data[j] = np.delete(data[j], i, axis=1)
+    imp_mean = SimpleImputer(missing_values=np.NaN, strategy='median')
+    # imputer = imp_mean.fit(data[0])
+    # df_imp = imputer.transform(data[0])
+    # print(df_imp.shape)
+    # print(data[0].shape)
     for i in range(2):
-        missing_value = np.where(np.isnan(data[i]))[0]
-        for j in reversed(missing_value):
-            for k in range(2):
-                data[i+k*2] = np.delete(data[i+k*2], j, axis=0)
+        imputer = imp_mean.fit(data[i])
+        data[i] = imputer.transform(data[i])
+        # std_scaler = StandardScaler()
+        # data[i] = std_scaler.fit_transform(data[i]) 
+    # print(data[0].shape)
+    # df_data = pd.DataFrame(df_imp)
+    
+    # for i in range(2):
+    #     missing_value = np.where(np.isnan(data[i]))[0]
+    #     for j in reversed(missing_value):
+    #         for k in range(2):
+    #             data[i+k*2] = np.delete(data[i+k*2], j, axis=0)
 
     # outlier value
     for i in reversed([0, 2, 3]): #age, Height, Weight
         for j in range(2):
             outlier = np.where(data[j][:, i] == 0.0)[0]
+            outlier = np.concatenate((outlier, np.where(data[j][:, i] >= 250.0)[0]))
             data[j] = np.delete(data[j], outlier, axis=0)
             data[j+2] = np.delete(data[j+2], outlier, axis=0)
+    #balance
+    # Implementation of PCA
+    # pca_dict = {}
+    # eigen_dict = {}
+    # for n_comp in range(data[0].shape[1]):
+    #     pca = PCA(n_components=n_comp)
+    #     temp_train_pca = pca.fit_transform(data[0])
+    #     temp_test_pca = pca.transform(data[1])
+    #     eigen_values = pca.explained_variance_[:n_comp]
+        
+    #     if n_comp > 0:
+    #         #print (n_comp,pca.explained_variance_ratio_.sum(),eigen_values)[-1])
+    #         pca_dict[n_comp] = pca.explained_variance_ratio_.sum()
+    #         eigen_dict[n_comp] = eigen_values[-1]
+    # # Selecting components with Eigen value greater than 1 from the list
+    # pca_comp_eigen = max([key for key,val in eigen_dict.items() if val >= 1])
+    # pca_comp_eigen = max([key for key,val in pca_dict.items() if val < 0.95])
+
+    # print('Components from Feature selection using PCA (Having Eigen values >=1)- ' + str(pca_comp_eigen) + '\n')
+
+    # # Performing PCA for the train data with the fixed components
+    # pca = PCA(n_components=pca_comp_eigen)
+    # data[0] = pca.fit_transform(data[0])
+    # data[1] = pca.transform(data[1])
+    # print('Feature Selection using PCA complete for the train data.\n\n')
+    
     return data
 
 def dataBalance(train_data, test_data, sample_type):
@@ -126,3 +168,4 @@ def standard(X, test_X):
     test_mu = np.mean(test_X, axis=0)
     test_std = np.std(test_X, axis=0)
     return (X - train_mu)/train_std, (test_X - test_mu)/test_std
+

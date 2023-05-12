@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, TensorDataset
-
+from sklearn.preprocessing import normalize, StandardScaler
 class NNClassifier(nn.Module):
     def __init__(self, list_layer):
         super(NNClassifier, self).__init__()
@@ -24,6 +24,7 @@ class NNClassifier(nn.Module):
         for layer in self.hiddn_layers:
             x = F.relu(layer(x))
         x = self.func_out(x)
+        # x = F.softmax(x, dim=1)
         return x
 
     def selectDevice(self, bool_force_cpu=False, int_gpu_id=None) -> None:
@@ -61,16 +62,32 @@ train_data, test_data, train_label, test_label = dataProcess.loadFile(datset_pat
 # print(test_label)
 data = dataProcess.dataClean([train_data, test_data, train_label, test_label])
 # print(data[3])
-network_shape = [data[0].shape[1], 256, 128, 64, 9]
+# print(np.where(np.isnan(train_label)))
+
+network_shape = [data[0].shape[1], 64, 128, 64, 9]
 list_network = generateNetwork(network_shape)
 train_data = data[0]
 test_data = data[1]
-train_label = data[2]
-test_label = data[3]
+train_label = data[2] - 1
+test_label = data[3] - 1
+# unknow_label = np.where(test_label>7)[0]
+# test_label = np.delete(test_label, unknow_label, axis=0)
+# test_data = np.delete(test_data, unknow_label, axis=0)
 
+# print(test_label)
+# print(train_data.shape)
+# from imblearn.over_sampling import SMOTE
 
+# smote = SMOTE(random_state=42)
+
+# # fit predictor and target variable
+# x_smote, y_smote = smote.fit_resample(train_data, train_label)
+
+# print('Original dataset shape', np.bincount(train_label))
+# print('Resample dataset shape', np.bincount(y_smote))
 X_train = torch.from_numpy(train_data).float()
 y_train = torch.from_numpy(train_label).long()
+
 dataset = TensorDataset(X_train, y_train)
 dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
 learning_rate = 0.01
@@ -81,20 +98,24 @@ optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
 
 for epoch in range(num_epochs):
-    for batch_idx, (X_train, y_train) in enumerate(dataloader):
-        # forward
-        outputs = model(X_train)
-        loss = criterion(outputs, y_train)
-        
-        # bp
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+    # for batch_idx, (X_train, y_train) in enumerate(dataloader):
+    # forward
+    outputs = model(X_train)
+    loss = criterion(outputs, y_train)
+    # print(outputs.shape)
+    
+    # bp
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
         
     if (epoch+1) % 100 == 0:
         print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
 
+# std_scaler = StandardScaler()
+# test_data = std_scaler.fit_transform(test_data) 
 X_test = torch.from_numpy(test_data).float()
+
 # y_test = torch.from_numpy(test_label).long()
 outputs = model(X_test)
 with torch.no_grad():
@@ -104,6 +125,10 @@ total = predicted.shape[0]
 correct = (predicted == test_label).sum().item()
 accuracy = correct / total
 print(f"accuracy = {accuracy*100:.2f} %")
+# i = 10
+# print(outputs[-i:])
+# print(predicted[-i:])
+# print(test_label[-i:])
 # print(predicted)
 # print(test_label)
 
