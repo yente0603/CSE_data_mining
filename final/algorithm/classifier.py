@@ -26,8 +26,6 @@ class NNClassifier(nn.Module):
         x = self.func_out(x)
         return x
 
-    
-    
     def selectDevice(self, bool_force_cpu=False, int_gpu_id=None) -> None:
         if not bool_force_cpu and self.bool_GPU_available:
             gpu_candidate = list()
