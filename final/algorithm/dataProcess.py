@@ -5,6 +5,8 @@ from matplotlib.colors import ListedColormap
 from sklearn.decomposition import PCA # only for reduce dimension
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import normalize, StandardScaler
+from sklearn.utils import class_weight
+
 def excutePCA(X, n_components=2):
     pca = PCA(n_components=n_components)
     return pca.fit_transform(X)
@@ -33,8 +35,8 @@ def dataClean(data):
     for i in range(2):
         imputer = imp_mean.fit(data[i])
         data[i] = imputer.transform(data[i])
-        # std_scaler = StandardScaler()
-        # data[i] = std_scaler.fit_transform(data[i]) 
+        std_scaler = StandardScaler()
+        data[i] = std_scaler.fit_transform(data[i]) 
     # print(data[0].shape)
     # df_data = pd.DataFrame(df_imp)
     
@@ -65,17 +67,34 @@ def dataClean(data):
     #         #print (n_comp,pca.explained_variance_ratio_.sum(),eigen_values)[-1])
     #         pca_dict[n_comp] = pca.explained_variance_ratio_.sum()
     #         eigen_dict[n_comp] = eigen_values[-1]
+    
+    # f = plt.figure(1)
+    # f.patch.set_facecolor('white')
+    # plt.title('PCA Variance')
+    # plt.xlabel('Principal Component Number')
+    # plt.ylabel('Variance Ratio')
+    # plt.plot(list(pca_dict.keys()),list(pca_dict.values()),'r')
+    # f.show()
+
+    # g = plt.figure(2)
+    # g.patch.set_facecolor('white')
+    # plt.title('PCA Eigen value')
+    # plt.xlabel('Principal Component Number')
+    # plt.ylabel('Eigen Values')
+    # plt.plot(list(eigen_dict.keys()),list(eigen_dict.values()),'r')
+    # g.show()
+    # g.savefig('pca.png')
     # # Selecting components with Eigen value greater than 1 from the list
     # pca_comp_eigen = max([key for key,val in eigen_dict.items() if val >= 1])
     # pca_comp_eigen = max([key for key,val in pca_dict.items() if val < 0.95])
 
     # print('Components from Feature selection using PCA (Having Eigen values >=1)- ' + str(pca_comp_eigen) + '\n')
-
-    # # Performing PCA for the train data with the fixed components
-    # pca = PCA(n_components=pca_comp_eigen)
-    # data[0] = pca.fit_transform(data[0])
-    # data[1] = pca.transform(data[1])
-    # print('Feature Selection using PCA complete for the train data.\n\n')
+    pca_comp_eigen = 83
+    # Performing PCA for the train data with the fixed components
+    pca = PCA(n_components=pca_comp_eigen)
+    data[0] = pca.fit_transform(data[0])
+    data[1] = pca.transform(data[1])
+    print('Feature Selection using PCA complete for the train data.\n\n')
     
     return data
 
