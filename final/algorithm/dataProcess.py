@@ -89,12 +89,12 @@ def dataClean(data):
     # pca_comp_eigen = max([key for key,val in pca_dict.items() if val < 0.95])
 
     # print('Components from Feature selection using PCA (Having Eigen values >=1)- ' + str(pca_comp_eigen) + '\n')
-    pca_comp_eigen = 83
-    # Performing PCA for the train data with the fixed components
-    pca = PCA(n_components=pca_comp_eigen)
-    data[0] = pca.fit_transform(data[0])
-    data[1] = pca.transform(data[1])
-    print('Feature Selection using PCA complete for the train data.\n\n')
+    # pca_comp_eigen = 83
+    # # Performing PCA for the train data with the fixed components
+    # pca = PCA(n_components=pca_comp_eigen)
+    # data[0] = pca.fit_transform(data[0])
+    # data[1] = pca.transform(data[1])
+    # print('Feature Selection using PCA complete for the train data.\n\n')
     
     return data
 
