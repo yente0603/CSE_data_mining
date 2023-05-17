@@ -167,6 +167,7 @@ def Con1d(train_data, test_data, train_label, test_label):
                     validation_data=(test_data, test_label),
                     # callbacks=[earlystop, checkpoint],
                     class_weight = class_weights_dict)
+    Accplot(hist, no_epochs)
 
 def Mlp(train_data, test_data, train_label, test_label):
     from keras.models import Sequential
@@ -209,6 +210,36 @@ def Mlp(train_data, test_data, train_label, test_label):
                     validation_data=(test_data, Yval),
                     # callbacks=[earlystop, checkpoint],
                     class_weight = mlp_class_weights_dict)
+    Accplot(hist, no_epochs)
+
+def Accplot(hist, no_epochs):
+    import matplotlib.pyplot as plt
+    sub=0
+    #    visualizing losses and accuracy
+    train_loss = hist.history['loss'][sub:]
+    val_loss = hist.history['val_loss'][sub:]
+    train_accu = hist.history['accuracy'][sub:]
+    val_accu = hist.history['val_accuracy'][sub:]
+    xc = range(no_epochs)
+
+    fig1 = plt.figure()
+    fig1.patch.set_facecolor('white')
+    plt.plot(xc, train_loss, label='Training loss')
+    plt.plot(xc, val_loss, label='Validation loss')
+    plt.legend(loc="upper right")
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    fig1.show()
+
+    fig2 = plt.figure()
+    fig2.patch.set_facecolor('white')
+    plt.plot(xc, train_accu, label='Training accuracy')
+    plt.plot(xc, val_accu, label='Validation accuracy')
+    plt.legend(loc="lower right")
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
+    fig2.show()
+    plt.show()
 
 def main():
     train_data, test_data, train_label, test_label = LoadData() 
