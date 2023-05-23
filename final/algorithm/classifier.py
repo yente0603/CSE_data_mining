@@ -59,9 +59,9 @@ def generateNetwork(list_network_shape):
     return interpreted_network_shape
 
 def LoadData():
-    datset_path = 'final/data/Arrhythmia Data Set/'
-    train_data, test_data, train_label, test_label = dataProcess.loadFile(datset_path)
-    data = dataProcess.dataClean([train_data, test_data, train_label, test_label])
+    dataset_path = 'final/data/Arrhythmia Data Set/'
+    data = dataProcess.loadFile(dataset_path)
+    data = dataProcess.dataClean(data)
     
     train_data = data[0]
     test_data = data[1]
