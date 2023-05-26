@@ -127,7 +127,7 @@ def standard(data):
     return data
 
 def main():
-    path = 'Arrhythmia Data Set/'
+    path = 'final/data/Arrhythmia Data Set/'
     clean = True
     pca = True
     train_data, test_data, train_label, test_label =\

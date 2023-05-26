@@ -92,7 +92,7 @@ def predict(model, dataset):
 
 def main():
 
-	dataset_path = 'Arrhythmia Data Set/'
+	dataset_path = 'final/data/Arrhythmia Data Set/'
 	clean = 'is_clean'
 	pca = ['using_pca', 'without_pca']
 	smote = ['using_smote', 'without_smote']
@@ -131,7 +131,7 @@ def main():
 			input_size = train_data.shape[1]
 			hidden_size = 128
 			output_size = 8
-			num_epochs = 100
+			num_epochs = 30
 
 			model = FC(input_size, hidden_size, output_size)
 			criterion = nn.CrossEntropyLoss()
@@ -146,61 +146,61 @@ def main():
 
 			# Training
 			for epoch in range(num_epochs):
-			    model.train()
+				model.train() 
 				# Iterate over the data_loader for training
-			    for batch in data_loader:
-			        inputs, labels = batch
+				for batch in data_loader:
+					inputs, labels = batch
 
 			        # Forward pass
-			        outputs = model(inputs)
+					outputs = model(inputs)
 
 			        # Compute the loss
-			        loss = criterion(outputs, labels)
+					loss = criterion(outputs, labels)
 
 			        # Backward pass and optimization
-			        optimizer.zero_grad()
-			        loss.backward()
-			        optimizer.step()
+					optimizer.zero_grad()
+					loss.backward()
+					optimizer.step()
 
 			    # Print the loss after each epoch
 			    #print(f"Epoch {epoch + 1} / {num_epochs}, Loss: {loss.item():.4f}")
 
-			    model.eval()
-			    with torch.no_grad():
-			    	acc = []
-			    	val_loss = 0
-			    	total_samples = 0
-			    	for inputs, labels in test_dataset:
-			    		outputs = model(inputs)
-			    		_, predicted = torch.max(outputs, dim=0)
-			    		if predicted == labels:
-			    			acc.append(1)
-			    		else:
-			    			acc.append(0)
+				model.eval()
+				with torch.no_grad():
+					acc = []
+					val_loss = 0
+					total_samples = 0
+					for inputs, labels in test_dataset:
+						outputs = model(inputs)
+						_, predicted = torch.max(outputs, dim=0)
+						if predicted == labels:
+							acc.append(1)
+						else:
+							acc.append(0)
 
-			    		loss = criterion(outputs, labels)
-			    		val_loss += loss.item() * len(inputs)
-			    		total_samples += len(inputs)
+						loss = criterion(outputs, labels)
+						val_loss += loss.item() * len(inputs)
+						total_samples += len(inputs)
 
-			    	pred_acc = np.array(acc).mean()
-			    	if pred_acc > max_acc:
-			    		max_acc = pred_acc
-			    		max_acc_epoch = epoch + 1
+					pred_acc = np.array(acc).mean()
+					if pred_acc > max_acc:
+						max_acc = pred_acc
+						max_acc_epoch = epoch + 1
 			    	#print(f'val acc: {pred_acc}')
 
-			    	val_loss /= total_samples
-			    	if lowest_val_loss > val_loss:
-			    		lowest_val_loss = val_loss
-			    		lowest_val_loss_epoch = epoch + 1
-			    		# Save the checkpoint that has the lowest validation loss
-			    		model_save = copy.deepcopy(model)
+					val_loss /= total_samples
+					if lowest_val_loss > val_loss:
+						lowest_val_loss = val_loss
+						lowest_val_loss_epoch = epoch + 1
+						# Save the checkpoint that has the lowest validation loss
+						model_save = copy.deepcopy(model)
 
 			    	#print(f'val loss: {val_loss:.4f}')
 
-			    scheduler.step(val_loss)
+				scheduler.step(val_loss)
 
-			print(f'Max acc: {max_acc} at {max_acc_epoch} epoch')
-			print(f'Lowest vaidation loss: {lowest_val_loss} at {lowest_val_loss_epoch} epoch')
+			print(f'Max acc: {max_acc*100:.2f}% at {max_acc_epoch} epoch')
+			print(f'Lowest vaidation loss: {lowest_val_loss:.4f} at {lowest_val_loss_epoch} epoch')
 
 			PATH = f'model_{clean}_{pca}_{smote}_norm_option_{norm_data}.pt'
 			# Save the best model to PATH
@@ -224,7 +224,7 @@ def main():
 					total_samples += len(inputs)
 
 				pred_acc = np.array(acc).mean()
-				print(f'final acc: {pred_acc}')
+				print(f'final acc: {pred_acc*100:.2f}%')
 
 	else:
 		# Preparing data, using the above test set as example
