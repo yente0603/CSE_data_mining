@@ -90,14 +90,14 @@ def predict(model, dataset):
 
 	return prob_list
 
-def main():
+def classifier(is_inference=False):
 
 	dataset_path = 'final/data/Arrhythmia Data Set/'
 	clean = 'is_clean'
 	pca = ['using_pca', 'without_pca']
 	smote = ['using_smote', 'without_smote']
 	norm_data = ['None']
-	is_inference = False
+	# is_inference = True
 
 	# Get all combinations of options
 	all_options = itertools.product(pca, smote, norm_data)
@@ -214,6 +214,7 @@ def main():
 				for inputs, labels in test_dataset:
 					outputs = model(inputs)
 					_, predicted = torch.max(outputs, dim=0)
+
 					pred.append(predicted.item())
 					if predicted == labels:
 						acc.append(1)
@@ -228,11 +229,14 @@ def main():
 
 	else:
 		# Preparing data, using the above test set as example
-		train_data, _, train_label, _ =\
+		train_data, test_data, train_label, test_label =\
 			dataProcessing(dataset_path, clean_data=clean, PCAMethod='without_pca', norm_data='None')
 		X, y = using_smote(train_data, train_label)
 		_, X_test, _, y_test = train_test_split(X, y, test_size=0.2, random_state=4, stratify=y)
 		test_dataset = torch.utils.data.TensorDataset(X_test, y_test)
+		test_data = torch.from_numpy(test_data).float()
+		test_label = torch.from_numpy(test_label).long()
+		# test_dataset = torch.utils.data.TensorDataset(test_data, test_label)
 		input_size = X_test.shape[1]
 		hidden_size = 128
 		output_size = 8
@@ -242,12 +246,17 @@ def main():
 		model = FC(input_size, hidden_size, output_size)
 		model.load_state_dict(torch.load(model_path))
 		predicted_probabilities = predict(model, test_dataset)
-
-		for pred, label in predicted_probabilities.items():
+		
+		for index, (pred, label) in enumerate(predicted_probabilities.items()):
 			if np.argmax(pred, axis=0) == label:
-				print(f'{label}: {["%0.2f" % i for i in pred]} right prediction')
+				# print(f'{label}: {["%0.2f" % i for i in pred]} right prediction')
+				pass
 			else:
+				# print(pred)
 				print(f'{label}: {["%0.2f" % i for i in pred]} wrong prediction')
+
+def main():
+	classifier(is_inference=True)
 
 if __name__ == "__main__":
 	main()
