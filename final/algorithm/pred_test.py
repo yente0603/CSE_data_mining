@@ -99,22 +99,26 @@ def main():
 
 	for pred, label in predicted_probabilities.items():
 		high_conf = np.argmax(pred, axis=0)
+		print(["%0.2f" % i for i in pred])
 		if label < 8:
-			print(f'True:{label} Pred:{high_conf}')
+			print(f'True:{label} Pred:{high_conf}', end='\n\n')
 			if label == high_conf:
 				acc.append(1)
 			else:
 				acc.append(0)
 		else:
-			for i in pred:
-				if i >= 0.9:
-					high_conf = i
 			high_conf = -1
-			print(f'True:{label} Pred:{high_conf}')
+			for i, p in enumerate(pred):
+				if p >= 0.9:
+					high_conf = i
+			print(f'True:{label} Pred:{high_conf}', end='\n\n')
 			if high_conf == -1:
 				acc.append(1)
 			else:
 				acc.append(0)
+
+	pred_acc = np.array(acc).mean()
+	print(pred_acc)
 
 	pred_acc = np.array(acc).mean()
 	print(pred_acc)

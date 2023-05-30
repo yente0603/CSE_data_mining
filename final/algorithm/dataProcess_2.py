@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA # only for reduce dimension
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import normalize, StandardScaler
-import math
 
 def loadFile(path):
     train_data = np.genfromtxt(path + 'train_data.csv', delimiter=',')
@@ -86,14 +85,14 @@ def dataProcessing(path, clean_data, PCAMethod, norm_data=None):
     org_test = data[1].shape
     print(f'The original training data have {org_train}.')
     print(f'The original testing  data have {org_test}.')
-    if clean_data == 'is_clean':
+    if clean_data:
         data = dataClean(data)
         print('\nCleaning data...')
         print(f'clean original training data: {org_train} -> {data[0].shape}')
         print(f'clean original testing  data: {org_test} -> {data[1].shape}')
     org_train = data[0].shape
     org_test = data[1].shape
-    if PCAMethod == 'using_pca':
+    if PCAMethod:
         data = excutePCA(data)
         print('\nPCA...')
         print(f'original training data: {org_train} -> {data[0].shape}')
@@ -130,11 +129,7 @@ def main():
     path = 'final/data/Arrhythmia Data Set/'
     clean = True
     pca = True
-    train_data, test_data, train_label, test_label =\
-        dataProcessing(path, clean_data=clean, PCAMethod=pca, norm_data='Z-score')
-
-    print(train_data.shape)
-    print(train_label)
+    return dataProcessing(path, clean_data=clean, PCAMethod=pca, norm_data='Z-score')
 
 if __name__ == "__main__":
     data = main()
