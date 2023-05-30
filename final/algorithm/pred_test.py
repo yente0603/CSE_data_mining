@@ -68,7 +68,11 @@ def without_smote(train_data, train_label):
 
 def main():
 
+<<<<<<< HEAD
 	dataset_path = 'Arrhythmia Data Set/'
+=======
+	dataset_path = '/final/algorithm/Arrhythmia Data Set/'
+>>>>>>> b72c1af70d36b7c99d39bd216c3e7ef0062895de
 	clean = 'is_clean'
 	pca = 'without_pca'
 	norm_data = 'None'
@@ -99,19 +103,32 @@ def main():
 
 	for pred, label in predicted_probabilities.items():
 		high_conf = np.argmax(pred, axis=0)
+<<<<<<< HEAD
 		print(["%0.2f" % i for i in pred])
 		if label < 8:
 			print(f'True:{label} Pred:{high_conf}', end='\n\n')
+=======
+		if label < 8:
+			print(f'True:{label} Pred:{high_conf}')
+>>>>>>> b72c1af70d36b7c99d39bd216c3e7ef0062895de
 			if label == high_conf:
 				acc.append(1)
 			else:
 				acc.append(0)
 		else:
+<<<<<<< HEAD
 			high_conf = -1
 			for i, p in enumerate(pred):
 				if p >= 0.9:
 					high_conf = i
 			print(f'True:{label} Pred:{high_conf}', end='\n\n')
+=======
+			for i in pred:
+				if i >= 0.9:
+					high_conf = i
+			high_conf = -1
+			print(f'True:{label} Pred:{high_conf}')
+>>>>>>> b72c1af70d36b7c99d39bd216c3e7ef0062895de
 			if high_conf == -1:
 				acc.append(1)
 			else:
@@ -120,9 +137,12 @@ def main():
 	pred_acc = np.array(acc).mean()
 	print(pred_acc)
 
+<<<<<<< HEAD
 	pred_acc = np.array(acc).mean()
 	print(pred_acc)
 
+=======
+>>>>>>> b72c1af70d36b7c99d39bd216c3e7ef0062895de
 
 if __name__ == "__main__":
 	main()

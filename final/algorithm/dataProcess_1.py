@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA # only for reduce dimension
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import normalize, StandardScaler
-import math
 
 def loadFile(path):
     train_data = np.genfromtxt(path + 'train_data.csv', delimiter=',')
@@ -37,41 +36,40 @@ def dataClean(data):
     return data
 
 def excutePCA(data, showPCA=False):
-    # # Implementation of PCA
-    # pca_dict = {}
-    # eigen_dict = {}
-    # for n_comp in range(data[0].shape[1]):
-    #     pca = PCA(n_components=n_comp)
-    #     temp_train_pca = pca.fit_transform(data[0])
-    #     temp_test_pca = pca.transform(data[1])
-    #     eigen_values = pca.explained_variance_[:n_comp]
-    #     if n_comp > 0:
-    #         pca_dict[n_comp] = pca.explained_variance_ratio_.sum()
-    #         eigen_dict[n_comp] = eigen_values[-1]
-    # if showPCA:
-    #     f = plt.figure(1)
-    #     f.patch.set_facecolor('white')
-    #     plt.title('PCA Variance')
-    #     plt.xlabel('Principal Component Number')
-    #     plt.ylabel('Variance Ratio')
-    #     plt.plot(list(pca_dict.keys()),list(pca_dict.values()),'r')
-    #     f.show()
+    # Implementation of PCA
+    pca_dict = {}
+    eigen_dict = {}
+    for n_comp in range(data[0].shape[1]):
+        pca = PCA(n_components=n_comp)
+        temp_train_pca = pca.fit_transform(data[0])
+        temp_test_pca = pca.transform(data[1])
+        eigen_values = pca.explained_variance_[:n_comp]
+        if n_comp > 0:
+            pca_dict[n_comp] = pca.explained_variance_ratio_.sum()
+            eigen_dict[n_comp] = eigen_values[-1]
+    if showPCA:
+        f = plt.figure(1)
+        f.patch.set_facecolor('white')
+        plt.title('PCA Variance')
+        plt.xlabel('Principal Component Number')
+        plt.ylabel('Variance Ratio')
+        plt.plot(list(pca_dict.keys()),list(pca_dict.values()),'r')
+        f.show()
 
-    #     g = plt.figure(2)
-    #     g.patch.set_facecolor('white')
-    #     plt.title('PCA Eigen value')
-    #     plt.xlabel('Principal Component Number')
-    #     plt.ylabel('Eigen Values')
-    #     plt.plot(list(eigen_dict.keys()),list(eigen_dict.values()),'r')
-    #     g.show()
-    #     g.savefig('pca.png')
-    # # Selecting components with Eigen value greater than 1 from the list
-    # pca_comp_eigen = max([key for key,val in eigen_dict.items() if val >= 1])
-    # pca_comp_eigen = max([key for key,val in pca_dict.items() if val < 0.95])
+        g = plt.figure(2)
+        g.patch.set_facecolor('white')
+        plt.title('PCA Eigen value')
+        plt.xlabel('Principal Component Number')
+        plt.ylabel('Eigen Values')
+        plt.plot(list(eigen_dict.keys()),list(eigen_dict.values()),'r')
+        g.show()
+        g.savefig('pca.png')
+    # Selecting components with Eigen value greater than 1 from the list
+    pca_comp_eigen = max([key for key,val in eigen_dict.items() if val >= 1])
+    pca_comp_eigen = max([key for key,val in pca_dict.items() if val < 0.95])
 
-    # print('Components from Feature selection using PCA (Having Eigen values >=1)- ' + str(pca_comp_eigen) + '')
+    print('Components from Feature selection using PCA (Having Eigen values >=1)- ' + str(pca_comp_eigen) + '')
     # Performing PCA for the train data with the fixed components
-    pca_comp_eigen = 83
     pca = PCA(n_components=pca_comp_eigen)
     data[0] = pca.fit_transform(data[0])
     data[1] = pca.transform(data[1])
@@ -87,14 +85,14 @@ def dataProcessing(path, clean_data, PCAMethod, norm_data=None):
     org_test = data[1].shape
     print(f'The original training data have {org_train}.')
     print(f'The original testing  data have {org_test}.')
-    if clean_data == 'is_clean':
+    if clean_data:
         data = dataClean(data)
         print('\nCleaning data...')
         print(f'clean original training data: {org_train} -> {data[0].shape}')
         print(f'clean original testing  data: {org_test} -> {data[1].shape}')
     org_train = data[0].shape
     org_test = data[1].shape
-    if PCAMethod == 'using_pca':
+    if PCAMethod:
         data = excutePCA(data)
         print('\nPCA...')
         print(f'original training data: {org_train} -> {data[0].shape}')
@@ -131,11 +129,7 @@ def main():
     path = 'final/data/Arrhythmia Data Set/'
     clean = True
     pca = True
-    train_data, test_data, train_label, test_label =\
-        dataProcessing(path, clean_data=clean, PCAMethod=pca, norm_data='Z-score')
-
-    print(train_data.shape)
-    print(train_label)
+    return dataProcessing(path, clean_data=clean, PCAMethod=pca, norm_data='Z-score')
 
 if __name__ == "__main__":
     data = main()
