@@ -1,180 +1,180 @@
 model : is_clean_without_pca_without_smote_norm_option_MinMax
-Acc : 12.66%
+Acc : 0.63%
 
 model : is_clean_without_pca_without_smote_norm_option_MinMax
-Acc : 0.00%
+Acc : 28.48%
 
 model : is_clean_without_pca_without_smote_norm_option_Z_score
+Acc : 34.18%
+
+model : is_clean_without_pca_without_smote_norm_option_Z_score
+Acc : 34.18%
+
+model : is_clean_without_pca_without_smote_norm_option_None
 Acc : 34.81%
 
-model : is_clean_without_pca_without_smote_norm_option_Z_score
-Acc : 37.97%
-
 model : is_clean_without_pca_without_smote_norm_option_None
-Acc : 18.35%
-
-model : is_clean_without_pca_without_smote_norm_option_None
-Acc : 16.46%
+Acc : 32.91%
 
 model : is_clean_without_pca_using_SMOTETomek_norm_option_MinMax
-Acc : 10.13%
+Acc : 5.06%
 
 model : is_clean_without_pca_using_SMOTETomek_norm_option_MinMax
-Acc : 8.86%
+Acc : 2.53%
 
 model : is_clean_without_pca_using_SMOTETomek_norm_option_Z_score
-Acc : 32.28%
+Acc : 24.68%
 
 model : is_clean_without_pca_using_SMOTETomek_norm_option_Z_score
-Acc : 32.28%
+Acc : 6.96%
 
 model : is_clean_without_pca_using_SMOTETomek_norm_option_None
-Acc : 30.38%
+Acc : 31.65%
 
 model : is_clean_without_pca_using_SMOTETomek_norm_option_None
-Acc : 18.99%
+Acc : 29.11%
 
 model : is_clean_without_pca_using_smote_oversample_norm_option_MinMax
-Acc : 3.80%
+Acc : 0.00%
 
 model : is_clean_without_pca_using_smote_oversample_norm_option_MinMax
-Acc : 7.59%
+Acc : 15.19%
 
 model : is_clean_without_pca_using_smote_oversample_norm_option_Z_score
-Acc : 31.01%
+Acc : 28.48%
 
 model : is_clean_without_pca_using_smote_oversample_norm_option_Z_score
 Acc : 17.09%
 
 model : is_clean_without_pca_using_smote_oversample_norm_option_None
-Acc : 30.38%
+Acc : 31.01%
 
 model : is_clean_without_pca_using_smote_oversample_norm_option_None
-Acc : 20.89%
+Acc : 25.32%
 
 model : is_clean_without_pca_using_smote_undersample_norm_option_MinMax
 Acc : 0.00%
 
 model : is_clean_without_pca_using_smote_undersample_norm_option_MinMax
-Acc : 31.65%
+Acc : 1.90%
 
 model : is_clean_without_pca_using_smote_undersample_norm_option_Z_score
-Acc : 0.63%
+Acc : 31.01%
 
 model : is_clean_without_pca_using_smote_undersample_norm_option_Z_score
-Acc : 16.46%
-
-model : is_clean_without_pca_using_smote_undersample_norm_option_None
-Acc : 23.42%
-
-model : is_clean_without_pca_using_smote_undersample_norm_option_None
 Acc : 0.00%
 
-model : is_clean_without_pca_using_SMOTEENN_norm_option_MinMax
-Acc : 8.86%
+model : is_clean_without_pca_using_smote_undersample_norm_option_None
+Acc : 25.32%
+
+model : is_clean_without_pca_using_smote_undersample_norm_option_None
+Acc : 27.22%
 
 model : is_clean_without_pca_using_SMOTEENN_norm_option_MinMax
-Acc : 3.16%
+Acc : 3.80%
+
+model : is_clean_without_pca_using_SMOTEENN_norm_option_MinMax
+Acc : 10.76%
+
+model : is_clean_without_pca_using_SMOTEENN_norm_option_Z_score
+Acc : 27.85%
 
 model : is_clean_without_pca_using_SMOTEENN_norm_option_Z_score
 Acc : 29.75%
 
-model : is_clean_without_pca_using_SMOTEENN_norm_option_Z_score
+model : is_clean_without_pca_using_SMOTEENN_norm_option_None
 Acc : 26.58%
 
 model : is_clean_without_pca_using_SMOTEENN_norm_option_None
-Acc : 28.48%
-
-model : is_clean_without_pca_using_SMOTEENN_norm_option_None
-Acc : 12.03%
-
-model : is_clean_using_pca_without_smote_norm_option_MinMax
-Acc : 8.86%
+Acc : 21.52%
 
 model : is_clean_using_pca_without_smote_norm_option_MinMax
 Acc : 0.63%
 
-model : is_clean_using_pca_without_smote_norm_option_Z_score
-Acc : 34.18%
+model : is_clean_using_pca_without_smote_norm_option_MinMax
+Acc : 13.92%
 
 model : is_clean_using_pca_without_smote_norm_option_Z_score
-Acc : 39.24%
+Acc : 0.63%
+
+model : is_clean_using_pca_without_smote_norm_option_Z_score
+Acc : 27.22%
 
 model : is_clean_using_pca_without_smote_norm_option_None
-Acc : 33.54%
+Acc : 32.91%
 
 model : is_clean_using_pca_without_smote_norm_option_None
-Acc : 32.28%
+Acc : 26.58%
 
 model : is_clean_using_pca_using_SMOTETomek_norm_option_MinMax
-Acc : 16.46%
+Acc : 4.43%
 
 model : is_clean_using_pca_using_SMOTETomek_norm_option_MinMax
-Acc : 8.23%
-
-model : is_clean_using_pca_using_SMOTETomek_norm_option_Z_score
-Acc : 32.28%
-
-model : is_clean_using_pca_using_SMOTETomek_norm_option_Z_score
-Acc : 36.08%
-
-model : is_clean_using_pca_using_SMOTETomek_norm_option_None
-Acc : 31.65%
-
-model : is_clean_using_pca_using_SMOTETomek_norm_option_None
-Acc : 28.48%
-
-model : is_clean_using_pca_using_smote_oversample_norm_option_MinMax
-Acc : 17.09%
-
-model : is_clean_using_pca_using_smote_oversample_norm_option_MinMax
-Acc : 6.33%
-
-model : is_clean_using_pca_using_smote_oversample_norm_option_Z_score
-Acc : 32.91%
-
-model : is_clean_using_pca_using_smote_oversample_norm_option_Z_score
-Acc : 25.95%
-
-model : is_clean_using_pca_using_smote_oversample_norm_option_None
-Acc : 32.91%
-
-model : is_clean_using_pca_using_smote_oversample_norm_option_None
-Acc : 29.11%
-
-model : is_clean_using_pca_using_smote_undersample_norm_option_MinMax
-Acc : 1.27%
-
-model : is_clean_using_pca_using_smote_undersample_norm_option_MinMax
-Acc : 12.03%
-
-model : is_clean_using_pca_using_smote_undersample_norm_option_Z_score
 Acc : 3.80%
 
+model : is_clean_using_pca_using_SMOTETomek_norm_option_Z_score
+Acc : 25.32%
+
+model : is_clean_using_pca_using_SMOTETomek_norm_option_Z_score
+Acc : 10.76%
+
+model : is_clean_using_pca_using_SMOTETomek_norm_option_None
+Acc : 32.91%
+
+model : is_clean_using_pca_using_SMOTETomek_norm_option_None
+Acc : 35.44%
+
+model : is_clean_using_pca_using_smote_oversample_norm_option_MinMax
+Acc : 7.59%
+
+model : is_clean_using_pca_using_smote_oversample_norm_option_MinMax
+Acc : 17.72%
+
+model : is_clean_using_pca_using_smote_oversample_norm_option_Z_score
+Acc : 27.22%
+
+model : is_clean_using_pca_using_smote_oversample_norm_option_Z_score
+Acc : 24.05%
+
+model : is_clean_using_pca_using_smote_oversample_norm_option_None
+Acc : 31.65%
+
+model : is_clean_using_pca_using_smote_oversample_norm_option_None
+Acc : 25.32%
+
+model : is_clean_using_pca_using_smote_undersample_norm_option_MinMax
+Acc : 8.23%
+
+model : is_clean_using_pca_using_smote_undersample_norm_option_MinMax
+Acc : 26.58%
+
 model : is_clean_using_pca_using_smote_undersample_norm_option_Z_score
-Acc : 28.48%
+Acc : 5.70%
+
+model : is_clean_using_pca_using_smote_undersample_norm_option_Z_score
+Acc : 31.65%
 
 model : is_clean_using_pca_using_smote_undersample_norm_option_None
-Acc : 8.86%
-
-model : is_clean_using_pca_using_smote_undersample_norm_option_None
-Acc : 33.54%
-
-model : is_clean_using_pca_using_SMOTEENN_norm_option_MinMax
-Acc : 5.06%
-
-model : is_clean_using_pca_using_SMOTEENN_norm_option_MinMax
-Acc : 15.19%
-
-model : is_clean_using_pca_using_SMOTEENN_norm_option_Z_score
 Acc : 30.38%
 
+model : is_clean_using_pca_using_smote_undersample_norm_option_None
+Acc : 0.63%
+
+model : is_clean_using_pca_using_SMOTEENN_norm_option_MinMax
+Acc : 8.23%
+
+model : is_clean_using_pca_using_SMOTEENN_norm_option_MinMax
+Acc : 3.16%
+
 model : is_clean_using_pca_using_SMOTEENN_norm_option_Z_score
-Acc : 28.48%
+Acc : 29.75%
+
+model : is_clean_using_pca_using_SMOTEENN_norm_option_Z_score
+Acc : 19.62%
 
 model : is_clean_using_pca_using_SMOTEENN_norm_option_None
-Acc : 32.28%
+Acc : 27.85%
 
 model : is_clean_using_pca_using_SMOTEENN_norm_option_None
-Acc : 20.25%
+Acc : 27.85%
 
