@@ -200,4 +200,6 @@ def main():
 		i += 1
 	# print(f'max acc = {max(acc_list)*100:.2f} index = {np.argmax(acc_list)}')
 if __name__ == "__main__":
+	import classifier
+	classifier.main()
 	main()

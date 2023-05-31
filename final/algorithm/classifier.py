@@ -23,7 +23,6 @@ class FC(nn.Module):
 		self.layer = nn.ParameterList([
 			nn.Linear(input_size, hidden_size//2),
 			nn.Linear(hidden_size//2, hidden_size//2),
-			nn.Linear(hidden_size, hidden_size),
 			nn.Linear(hidden_size//2, hidden_size),
 			nn.Linear(hidden_size, output_size)
 		])

@@ -37,40 +37,40 @@ def dataClean(data):
 
 def excutePCA(data, showPCA=False):
     # Implementation of PCA
-    pca_dict = {}
-    eigen_dict = {}
-    for n_comp in range(data[0].shape[1]):
-        pca = PCA(n_components=n_comp)
-        temp_train_pca = pca.fit_transform(data[0])
-        temp_test_pca = pca.transform(data[1])
-        eigen_values = pca.explained_variance_[:n_comp]
-        if n_comp > 0:
-            pca_dict[n_comp] = pca.explained_variance_ratio_.sum()
-            eigen_dict[n_comp] = eigen_values[-1]
-    if showPCA:
-        f = plt.figure(1)
-        f.patch.set_facecolor('white')
-        plt.title('PCA Variance')
-        plt.xlabel('Principal Component Number')
-        plt.ylabel('Variance Ratio')
-        plt.plot(list(pca_dict.keys()),list(pca_dict.values()),'r')
-        f.show()
-        f.savefig('final/output/Variance.png')
+    # pca_dict = {}
+    # eigen_dict = {}
+    # for n_comp in range(data[0].shape[1]):
+    #     pca = PCA(n_components=n_comp)
+    #     temp_train_pca = pca.fit_transform(data[0])
+    #     temp_test_pca = pca.transform(data[1])
+    #     eigen_values = pca.explained_variance_[:n_comp]
+    #     if n_comp > 0:
+    #         pca_dict[n_comp] = pca.explained_variance_ratio_.sum()
+    #         eigen_dict[n_comp] = eigen_values[-1]
+    # if showPCA:
+    #     f = plt.figure(1)
+    #     f.patch.set_facecolor('white')
+    #     plt.title('PCA Variance')
+    #     plt.xlabel('Principal Component Number')
+    #     plt.ylabel('Variance Ratio')
+    #     plt.plot(list(pca_dict.keys()),list(pca_dict.values()),'r')
+    #     f.show()
+    #     f.savefig('final/output/Variance.png')
 
-        g = plt.figure(2)
-        g.patch.set_facecolor('white')
-        plt.title('PCA Eigen value')
-        plt.xlabel('Principal Component Number')
-        plt.ylabel('Eigen Values')
-        plt.plot(list(eigen_dict.keys()),list(eigen_dict.values()),'r')
-        g.show()
-        g.savefig('final/output/Eigen_value.png')
-    # Selecting components with Eigen value greater than 1 from the list
-    pca_comp_eigen = max([key for key,val in eigen_dict.items() if val >= 1])
-    pca_comp_eigen = max([key for key,val in pca_dict.items() if val < 0.95])
+    #     g = plt.figure(2)
+    #     g.patch.set_facecolor('white')
+    #     plt.title('PCA Eigen value')
+    #     plt.xlabel('Principal Component Number')
+    #     plt.ylabel('Eigen Values')
+    #     plt.plot(list(eigen_dict.keys()),list(eigen_dict.values()),'r')
+    #     g.show()
+    #     g.savefig('final/output/Eigen_value.png')
+    # # Selecting components with Eigen value greater than 1 from the list
+    # pca_comp_eigen = max([key for key,val in eigen_dict.items() if val >= 1])
+    # pca_comp_eigen = max([key for key,val in pca_dict.items() if val < 0.95])
 
-    # print('Components from Feature selection using PCA (Having Eigen values >=1)- ' + str(pca_comp_eigen) + '')
-    # Performing PCA for the train data with the fixed components
+    # # print('Components from Feature selection using PCA (Having Eigen values >=1)- ' + str(pca_comp_eigen) + '')
+    # # Performing PCA for the train data with the fixed components
     pca = PCA(n_components=83)
     data[0] = pca.fit_transform(data[0])
     data[1] = pca.transform(data[1])
