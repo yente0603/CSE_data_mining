@@ -55,6 +55,7 @@ def excutePCA(data, showPCA=False):
         plt.ylabel('Variance Ratio')
         plt.plot(list(pca_dict.keys()),list(pca_dict.values()),'r')
         f.show()
+        f.savefig('final/output/Variance.png')
 
         g = plt.figure(2)
         g.patch.set_facecolor('white')
@@ -63,47 +64,47 @@ def excutePCA(data, showPCA=False):
         plt.ylabel('Eigen Values')
         plt.plot(list(eigen_dict.keys()),list(eigen_dict.values()),'r')
         g.show()
-        g.savefig('pca.png')
+        g.savefig('final/output/Eigen_value.png')
     # Selecting components with Eigen value greater than 1 from the list
     pca_comp_eigen = max([key for key,val in eigen_dict.items() if val >= 1])
     pca_comp_eigen = max([key for key,val in pca_dict.items() if val < 0.95])
 
-    print('Components from Feature selection using PCA (Having Eigen values >=1)- ' + str(pca_comp_eigen) + '')
+    # print('Components from Feature selection using PCA (Having Eigen values >=1)- ' + str(pca_comp_eigen) + '')
     # Performing PCA for the train data with the fixed components
-    pca = PCA(n_components=pca_comp_eigen)
+    pca = PCA(n_components=83)
     data[0] = pca.fit_transform(data[0])
     data[1] = pca.transform(data[1])
-    print('Feature Selection using PCA complete for the train data.')
+    # print('Feature Selection using PCA complete for the train data.')
     return data
 
 
 def dataProcessing(path, clean_data, PCAMethod, norm_data=None):
-    print('===========================================================================')
-    print('Loading datasets...')
+    # print('===========================================================================')
+    # print('Loading datasets...')
     data = loadFile(path)
     org_train = data[0].shape
     org_test = data[1].shape
-    print(f'The original training data have {org_train}.')
-    print(f'The original testing  data have {org_test}.')
+    # print(f'The original training data have {org_train}.')
+    # print(f'The original testing  data have {org_test}.')
     if clean_data:
         data = dataClean(data)
-        print('\nCleaning data...')
-        print(f'clean original training data: {org_train} -> {data[0].shape}')
-        print(f'clean original testing  data: {org_test} -> {data[1].shape}')
+        # print('\nCleaning data...')
+        # print(f'clean original training data: {org_train} -> {data[0].shape}')
+        # print(f'clean original testing  data: {org_test} -> {data[1].shape}')
     org_train = data[0].shape
     org_test = data[1].shape
     if PCAMethod:
         data = excutePCA(data)
-        print('\nPCA...')
-        print(f'original training data: {org_train} -> {data[0].shape}')
-        print(f'original testing  data: {org_test} -> {data[1].shape}')
+        # print('\nPCA...')
+        # print(f'original training data: {org_train} -> {data[0].shape}')
+        # print(f'original testing  data: {org_test} -> {data[1].shape}')
     if norm_data in 'Min-Max':
         data = norm(data)
-        print('\nMin-Max normalization method...')
+        # print('\nMin-Max normalization method...')
     elif norm_data == 'Z-score':
         data = standard(data)
-        print('\nZ-score normalization method...')
-    print('===========================================================================')
+    #     print('\nZ-score normalization method...')
+    # print('===========================================================================')
     train_data = data[0]
     test_data = data[1]
     train_label = data[2]

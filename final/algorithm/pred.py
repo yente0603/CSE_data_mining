@@ -57,7 +57,7 @@ def predict(model, dataset):
 
 	return prob_list
 
-def kmeans(data, k, iter=200):
+def kmeans(data, k, iter=100):
 	centroids = data[np.random.choice(range(data.shape[0]), size=k, replace=False)]
 
 	for _ in range(iter):
@@ -83,7 +83,7 @@ def separate_lists_indices(l):
     return id1, id2
 
 def main():
-	dataset_path = 'Arrhythmia Data Set/'
+	dataset_path = 'final/data/Arrhythmia Data Set/'
 	clean = 'is_clean'
 	pca = ['without_pca', 'using_pca']
 	smote = ['without_smote', 'using_SMOTETomek', 'using_smote_oversample', 'using_smote_undersample', 'using_SMOTEENN']
@@ -92,15 +92,17 @@ def main():
 
 	# Get all combinations of options
 	all_options = itertools.product(pca, smote, norm_data, threshold)
-
+	acc_list = []
+	i = 0
+	output = open('final/output/output.txt', 'w')
 	for option in all_options:
 		pca, smote, norm_data, threshold = option
-		print('--------------------Options--------------------')
-		print(f'Clean: {clean}')
-		print(f'PCA: {pca}')
-		print(f'SMOTE: {smote}')
-		print(f'Normalization: {norm_data}')
-		print(f'Confidence threshold: {threshold}')
+		# print('--------------------Options--------------------')
+		# print(f'Clean: {clean}')
+		# print(f'PCA: {pca}')
+		# print(f'SMOTE: {smote}')
+		# print(f'Normalization: {norm_data}')
+		# print(f'Confidence threshold: {threshold}')
 
 		_, test_data, _, test_label =\
 			dataProcessing(dataset_path, clean_data=clean, PCAMethod=pca, norm_data='None')
@@ -122,7 +124,7 @@ def main():
 		output_size = 8
 
 		# Inference
-		model_path = f'model_{clean}_{pca}_{smote}_norm_option_{norm_data}.pt'
+		model_path = f'final/algorithm/model/model_{clean}_{pca}_{smote}_norm_option_{norm_data}.pt'
 		model = FC(input_size, hidden_size, output_size)
 		model.load_state_dict(torch.load(model_path))
 		predicted_probabilities = predict(model, test_dataset)
@@ -146,14 +148,15 @@ def main():
 			classify_acc = 0
 		else:
 			classify_acc = np.array(classify_pred).mean()
-		print(f'Original 8 class accuracy: {classify_acc}')
+		# print(f'Original 8 class accuracy: {classify_acc}')
 
 		_, cluster_index = separate_lists_indices(prediction)
 		data_to_be_clustered = test_data[cluster_index]
 
 		# Use kmeans on other classes
 		if data_to_be_clustered.shape[0] >= 5:
-			predicted_labels, centroids = kmeans(data_to_be_clustered, 5)
+			predicted_labels, centroids = kmeans(data_to_be_clustered, 2)
+			# predicted_labels, _ = kmeans2(data_to_be_clustered, 5, 100)
 
 			predicted_labels = np.array(predicted_labels, dtype='int64')
 			ground_truth = np.array(test_label, dtype='int64')[cluster_index]
@@ -164,7 +167,7 @@ def main():
 			confusion_matrix = np.zeros((num_classes_ground_truth, num_classes_predicted), dtype=int)
 
 			for true_label, predicted_label in zip(ground_truth, predicted_labels):
-			    confusion_matrix[true_label, predicted_label] += 1
+				confusion_matrix[true_label, predicted_label] += 1
 
 			# Apply the Hungarian algorithm
 			row_ind, col_ind = linear_sum_assignment(confusion_matrix.max() - confusion_matrix)
@@ -172,7 +175,7 @@ def main():
 			# Use the optimal assignment to remap the predicted labels:
 			remapped_labels = np.zeros_like(predicted_labels)
 			for true_label, predicted_label in zip(row_ind, col_ind):
-			    remapped_labels[predicted_labels == predicted_label] = true_label
+				remapped_labels[predicted_labels == predicted_label] = true_label
 
 			cluster_accuracy = []
 			for i, label in enumerate(remapped_labels):
@@ -184,9 +187,17 @@ def main():
 			cluster_accuracy = np.array(cluster_accuracy).mean()
 		else:
 			cluster_accuracy = 0
-
-		print("Clustering accuracy:", cluster_accuracy)
-		print(f'Overall accuracy: {classify_acc * len(classify_pred) / len(test_label) + cluster_accuracy * (len(test_label) - len(classify_pred)) / len(test_label)}', end='\n\n')
-
+		acc_list.append(cluster_accuracy)
+		# print("Clustering accuracy:", cluster_accuracy)
+		# if cluster_accuracy > 0.4:
+		# 	print(f'path:{model_path}')
+		# 	print("Clustering accuracy:", cluster_accuracy)
+		total_acc = classify_acc * len(classify_pred) / len(test_label) + cluster_accuracy * (len(test_label) - len(classify_pred)) / len(test_label)
+		output.write(f'model : {clean}_{pca}_{smote}_norm_option_{norm_data}\nAcc : {total_acc*100:.2f}%\n\n')
+		if total_acc > 0.35:
+			print(f'model : {clean}_{pca}_{smote}_norm_option_{norm_data}\nAcc : {total_acc*100:.2f}%')
+		# print(f'Overall accuracy: {classify_acc * len(classify_pred) / len(test_label) + cluster_accuracy * (len(test_label) - len(classify_pred)) / len(test_label)}', end='\n\n')
+		i += 1
+	# print(f'max acc = {max(acc_list)*100:.2f} index = {np.argmax(acc_list)}')
 if __name__ == "__main__":
 	main()

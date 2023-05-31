@@ -1,252 +1,241 @@
-import csv
-import numpy as np
-import dataProcess
 import torch
-import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
-from torch.utils.data import DataLoader, TensorDataset
-from sklearn.preprocessing import normalize, StandardScaler
+import numpy as np
+from torch.utils.data import DataLoader
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from torch import nn
+from torch import optim
+import torch.optim.lr_scheduler as lr_scheduler
+import os
+from dataProcess import *
+import copy
+from imblearn.over_sampling import SMOTE, RandomOverSampler
+from imblearn.combine import SMOTEENN, SMOTETomek
+from imblearn.pipeline import Pipeline
+from imblearn.under_sampling import RandomUnderSampler
+import itertools
+from sklearn.metrics import f1_score, accuracy_score
 
+class FC(nn.Module):
+	"""Fully connected neural network"""
+	def __init__(self, input_size, hidden_size, output_size):
+		super(FC, self).__init__()
+		self.layer = nn.ParameterList([
+			nn.Linear(input_size, hidden_size//2),
+			nn.Linear(hidden_size//2, hidden_size//2),
+			nn.Linear(hidden_size, hidden_size),
+			nn.Linear(hidden_size//2, hidden_size),
+			nn.Linear(hidden_size, output_size)
+		])
+		self.activation = nn.ReLU()
+		self.dropout = nn.Dropout(0.2)
 
-class NNClassifier(nn.Module):
-    def __init__(self, list_layer):
-        super(NNClassifier, self).__init__()
-        self.func_in = nn.Linear(*list_layer[0])
-        self.hiddn_layers = []
-        for layer in range(len(list_layer) - 2 ):
-            self.add_module('h_layer_' + str(layer), nn.Linear(*list_layer[layer+1]))
-            # getattr(self, 'h_layer_' + str(layer)).weight.data.normal_(0, 0.1)
-            self.hiddn_layers.append(getattr(self, 'h_layer_' + str(layer)))
-        self.func_out = nn.Linear(*list_layer[-1])
-        self.bool_GPU_available = False
+	def forward(self, x):
+		for i in range(len(self.layer) - 1):
+			x = self.layer[i](x)
+			x = self.activation(x)
+			x = self.dropout(x)
 
-    def forward(self, x):
-        x = F.softsign(self.func_in(x))
-        for layer in self.hiddn_layers:
-            x = F.relu(layer(x))
-        x = self.func_out(x)
-        # x = F.softmax(x, dim=1)
-        return x
+		x = self.layer[-1](x)
+		return x
 
-    def selectDevice(self, bool_force_cpu=False, int_gpu_id=None) -> None:
-        if not bool_force_cpu and self.bool_GPU_available:
-            gpu_candidate = list()
-            for gpu_index in range(torch.cuda.device_count()):
-                print("    device [{0}]: {1}".format(gpu_index, torch.cuda.get_device_name(gpu_index)))
-                gpu_candidate.append(gpu_index)
-            select = -1
-            if int_gpu_id is None:
-                while select not in gpu_candidate:
-                    select = int(input("Please select your device:"))
-            else:
-                print(f"Designate GPU ID {int_gpu_id}")
-                select = int_gpu_id
-            torch.cuda.set_device(select)
-            self.device = torch.device("cuda")
-            print(f"Device choosed: {torch.cuda.get_device_name(self.device)}")
-        else:
-            print(f"Device choosed : CPU")
-            self.device = torch.device("cpu")
-    def checkDeviceStatus(self):
-        if torch.cuda.is_available():
-            self.bool_GPU_available = True
+def using_SMOTEENN(X_train, y_train):
+	ros = RandomOverSampler()
+	smote_enn = SMOTEENN()
+	pipeline = Pipeline([
+		('oversample', ros),
+		('smote_enn', smote_enn),
+	])
+	X_train, y_train = pipeline.fit_resample(X_train, y_train)
+	X_train = torch.Tensor(X_train)
+	y_train = torch.Tensor(y_train).type(torch.LongTensor)
 
-def generateNetwork(list_network_shape):
-    interpreted_network_shape = []
-    for index in range(len(list_network_shape) - 1):
-        interpreted_network_shape.append((list_network_shape[index], list_network_shape[index + 1]))
-    return interpreted_network_shape
+	return X_train, y_train
 
-def LoadData():
-    dataset_path = 'final/data/Arrhythmia Data Set/'
-    data = dataProcess.loadFile(dataset_path)
-    data = dataProcess.dataClean(data)
-    
-    train_data = data[0]
-    test_data = data[1]
-    train_label = data[2] - 1
-    test_label = data[3] - 1
-    unknow_label = np.where(test_label>7)[0]
-    test_label = np.delete(test_label, unknow_label, axis=0)
-    test_data = np.delete(test_data, unknow_label, axis=0)
-    return train_data, test_data, train_label, test_label
+def using_SMOTETomek(X_train, y_train):
+	ros = RandomOverSampler()
+	smote_tomek = SMOTETomek()
+	pipeline = Pipeline([
+		('oversample', ros),
+		('smote_tomek', smote_tomek),
+	])
+	X_train, y_train = pipeline.fit_resample(X_train, y_train)
+	X_train = torch.Tensor(X_train)
+	y_train = torch.Tensor(y_train).type(torch.LongTensor)
 
-# print(test_label)
-# print(train_data.shape)
-# from imblearn.over_sampling import SMOTE
+	return X_train, y_train
 
-# smote = SMOTE(random_state=42)
+def using_smote_oversample(X_train, y_train):
+	ros = RandomOverSampler()
+	X_train, y_train = ros.fit_resample(X_train, y_train)
+	X_train = torch.Tensor(X_train)
+	y_train = torch.Tensor(y_train).type(torch.LongTensor)
 
-# # fit predictor and target variable
-# x_smote, y_smote = smote.fit_resample(train_data, train_label)
+	return X_train, y_train
 
-# print('Original dataset shape', np.bincount(train_label))
-# print('Resample dataset shape', np.bincount(y_smote))
+def using_smote_undersample(X_train, y_train):
+	rus = RandomUnderSampler(random_state=42, sampling_strategy='majority')
+	X_train, y_train = rus.fit_resample(X_train, y_train)
+	X_train = torch.Tensor(X_train)
+	y_train = torch.Tensor(y_train).type(torch.LongTensor)
 
-def Dnn(train_data, test_data, train_label, test_label):
-    network_shape = [train_data.shape[1], 64, 128, 64, 8]
-    list_network = generateNetwork(network_shape)
-    X_train = torch.from_numpy(train_data).float()
-    y_train = torch.from_numpy(train_label).long()
+	return X_train, y_train
 
-    dataset = TensorDataset(X_train, y_train)
-    dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
-    learning_rate = 0.01
-    num_epochs = 50
-    model = NNClassifier(list_network)
-    criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+def predict(model, dataset, y_test):
+	'''
+	return: a dict of predictions with key being the prediction and value being the true label
+	(every prediction contains 8 different values representing the predicted probabilities of each class)
+	'''
+	model.eval()
+	with torch.no_grad():
+		acc = []
+		pred = []
+		total_samples = 0
+		prob_list = {}
+		for inputs, labels in dataset:
+			outputs = model(inputs)
+			_, predicted = torch.max(outputs, dim=0)
+			pred.append(predicted.item())
+			predicted_probabilities = torch.softmax(outputs, dim=0)
+			prob_list[tuple(predicted_probabilities.tolist())] = labels
 
+		print(f'Accuracy: {accuracy_score(torch.Tensor.tolist(y_test), pred)}')
+		print(f'F1 score: {f1_score(torch.Tensor.tolist(y_test), pred, average="macro")}')
 
-    for epoch in range(num_epochs):
-        # for batch_idx, (X_train, y_train) in enumerate(dataloader):
-        # forward
-        outputs = model(X_train)
-        loss = criterion(outputs, y_train)
-        # print(outputs.shape)
-        
-        # bp
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-            
-        if (epoch+1) % 10 == 0:
-            print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
-
-    # std_scaler = StandardScaler()
-    # test_data = std_scaler.fit_transform(test_data) 
-    X_test = torch.from_numpy(test_data).float()
-
-    outputs = model(X_test)
-    with torch.no_grad():
-        _, predicted = torch.max(outputs.data, 1)
-        predicted = predicted.numpy()
-    total = predicted.shape[0]
-    correct = (predicted == test_label).sum().item()
-    accuracy = correct / total
-    print(f"accuracy = {accuracy*100:.2f} %")
-
-def Con1d(train_data, test_data, train_label, test_label):
-    from keras.models import Sequential
-    from keras.layers import Dense, Dropout, Flatten, LSTM
-    from keras.layers import Conv1D, MaxPooling1D,BatchNormalization,GlobalMaxPooling1D,MaxPooling1D
-    from keras.regularizers import l2,l1
-    from keras.utils import to_categorical
-    from keras.optimizers import RMSprop, SGD, Adam
-    y = train_label
-    train_data = np.expand_dims(train_data, 2)
-    train_label = to_categorical(train_label)
-    test_data = np.expand_dims(test_data, 2)
-    test_label = to_categorical(test_label)
-    model = Sequential()
-
-    model.add(Conv1D(filters=64, kernel_size=10,activation='relu',kernel_initializer='he_uniform', input_shape=(278,1)))
-    model.add(Conv1D(filters=128, kernel_size=10,activation='relu',kernel_initializer='he_uniform'))
-    model.add(Dropout(0.3))
-    model.add(Flatten())
-    model.add(Dense(128, activation='relu'))
-    model.add(Dense(64, activation='relu'))
-    model.add(Dense(8, activation='softmax'))
-    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-
-    model.summary()
-
-    from keras.callbacks import ModelCheckpoint, EarlyStopping
-    batch_size= 16
-    no_epochs = 20
-    from sklearn.utils import class_weight
-    earlystop = EarlyStopping(monitor='val_accuracy', patience=20)
-    # checkpoint = ModelCheckpoint('model-epoch-{epoch:03d}-valacc-{val_accuracy:03f}.h5', verbose=1, monitor='val_accuracy',save_best_only=True, mode='auto')
-    class_weights = class_weight.compute_class_weight(class_weight='balanced', classes=np.unique(y), y=y)
-    class_weights_dict = dict(zip([1,2,3,4,5,6,7,8], class_weights))
-    class_weights_dict[0] = 0
-    hist = model.fit(train_data, train_label, 
-                    epochs=no_epochs, 
-                    batch_size=batch_size, 
-                    validation_data=(test_data, test_label),
-                    # callbacks=[earlystop, checkpoint],
-                    class_weight = class_weights_dict)
-    Accplot(hist, no_epochs)
-
-def Mlp(train_data, test_data, train_label, test_label):
-    from keras.models import Sequential
-    from keras.layers import Dense, Dropout, Flatten, LSTM
-    from keras.layers import Conv1D, MaxPooling1D,BatchNormalization,GlobalMaxPooling1D,MaxPooling1D
-    from keras.regularizers import l2,l1
-    from keras.utils import to_categorical
-    from keras.optimizers import RMSprop, SGD, Adam
-    from sklearn.utils import class_weight
-    from keras.callbacks import ModelCheckpoint, EarlyStopping
-
-    y = train_label
-    Ytrain = to_categorical(train_label)
-    Yval = to_categorical(test_label)
-    mlp_class_weights = class_weight.compute_class_weight(class_weight='balanced', classes=np.unique(y), y=y)
-    mlp_class_weights_dict = dict(zip([1,2,3,4,5,6,7,8], mlp_class_weights))
-    mlp_class_weights_dict[0] = 0
-    
-    model = Sequential()
-
-    model.add(Dense(units=64,activation='relu',input_shape=(278,)))
-    model.add(Dense(units=128,activation='relu'))
-    model.add(Dense(8, activation='softmax'))
-    model.compile(loss='categorical_crossentropy',
-                optimizer='Adam',
-                metrics=['accuracy'])
-
-    model.summary()
-    
-    batch_size= 8
-    no_epochs = 20
-
-    earlystop = EarlyStopping(monitor='val_accuracy', patience=20)
-    # checkpoint = ModelCheckpoint('model-mlp-epoch-{epoch:03d}-valacc-{val_accuracy:03f}.h5', verbose=1, monitor='val_accuracy',save_best_only=True, mode='auto')
-
-    # Generate the fit model
-    hist = model.fit(train_data, Ytrain, 
-                    epochs=no_epochs, 
-                    batch_size=batch_size, 
-                    validation_data=(test_data, Yval),
-                    # callbacks=[earlystop, checkpoint],
-                    class_weight = mlp_class_weights_dict)
-    Accplot(hist, no_epochs)
-
-def Accplot(hist, no_epochs):
-    import matplotlib.pyplot as plt
-    sub=0
-    #    visualizing losses and accuracy
-    train_loss = hist.history['loss'][sub:]
-    val_loss = hist.history['val_loss'][sub:]
-    train_accu = hist.history['accuracy'][sub:]
-    val_accu = hist.history['val_accuracy'][sub:]
-    xc = range(no_epochs)
-
-    fig1 = plt.figure()
-    fig1.patch.set_facecolor('white')
-    plt.plot(xc, train_loss, label='Training loss')
-    plt.plot(xc, val_loss, label='Validation loss')
-    plt.legend(loc="upper right")
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    fig1.show()
-
-    fig2 = plt.figure()
-    fig2.patch.set_facecolor('white')
-    plt.plot(xc, train_accu, label='Training accuracy')
-    plt.plot(xc, val_accu, label='Validation accuracy')
-    plt.legend(loc="lower right")
-    plt.xlabel('Epochs')
-    plt.ylabel('Accuracy')
-    fig2.show()
-    plt.show()
+	return prob_list
 
 def main():
-    train_data, test_data, train_label, test_label = LoadData() 
-    # Dnn(train_data, test_data, train_label, test_label)
-    # Con1d(train_data, test_data, train_label, test_label)
-    Mlp(train_data, test_data, train_label, test_label)
+	dataset_path = 'final/data/Arrhythmia Data Set/'
+	clean = 'is_clean'
+	pca = ['without_pca', 'using_pca']
+	smote = ['using_SMOTETomek', 'using_smote_oversample', 'using_smote_undersample', 'using_SMOTEENN', 'without_smote']
+	norm_data = ['MinMax', 'Z_score', 'None']
 
+	# Get all combinations of options
+	all_options = itertools.product(pca, smote, norm_data)
 
-if __name__ =='__main__':
-    main()
+	# Iterate through all the combinations
+	for option in all_options:
+		pca, smote, norm_data = option
+		print('--------------------Options--------------------')
+		print(f'Clean: {clean}')
+		print(f'PCA: {pca}')
+		print(f'SMOTE: {smote}')
+		print(f'Normalization: {norm_data}')
+
+		train_data, _, train_label, _ =\
+			dataProcessing(dataset_path, clean_data=clean, PCAMethod=pca, norm_data='None')
+
+		train_data = train_data[1:]
+		if norm_data == 'MinMax':
+			scaler = MinMaxScaler()
+			train_data = scaler.fit_transform(train_data)
+		elif norm_data == 'Z_score':
+			scaler = StandardScaler()
+			train_data = scaler.fit_transform(train_data)
+
+		train_label = train_label[1:]
+		
+		# Minus one from every label because when using crossentropy loss the starting label is 0
+		train_label = [y - 1 for y in train_label]
+		X = torch.Tensor(train_data)
+		y = torch.Tensor(train_label).type(torch.LongTensor)
+
+		X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=4, stratify=train_label)
+
+		if smote == 'using_smote_oversample':
+			X_train, y_train = using_smote_oversample(X_train, y_train)
+		elif smote == 'using_smote_undersample':
+			X_train, y_train = using_smote_undersample(X_train, y_train)
+		elif smote == 'using_SMOTEENN':
+			X_train, y_train = using_SMOTEENN(X_train, y_train)
+		elif smote == 'using_SMOTETomek':
+			X_train, y_train = using_SMOTETomek(X_train, y_train)
+
+		train_dataset = torch.utils.data.TensorDataset(X_train, y_train)
+		test_dataset = torch.utils.data.TensorDataset(X_test, y_test)
+
+		# Hyperparameters
+		batch_size = train_data.shape[0]
+		shuffle_data = True
+		input_size = train_data.shape[1]
+		hidden_size = 512
+		output_size = 8
+		num_epochs = 50
+
+		model = FC(input_size, hidden_size, output_size)
+		criterion = nn.CrossEntropyLoss()
+		optimizer = optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)
+		scheduler = lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.1)
+
+		max_acc = 0
+		lowest_val_loss = 999999
+
+		data_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=shuffle_data)
+		model_save = None
+
+		# Training
+		for epoch in range(num_epochs):
+			model.train()
+			# Iterate over the data_loader for training
+			for batch in data_loader:
+				inputs, labels = batch
+
+		        # Forward pass
+				outputs = model(inputs)
+
+		        # Compute the loss
+				loss = criterion(outputs, labels)
+
+		        # Backward pass and optimization
+				optimizer.zero_grad()
+				loss.backward()
+				optimizer.step()
+
+		    # Print the loss after each epoch
+		    #print(f"Epoch {epoch + 1} / {num_epochs}, Loss: {loss.item():.4f}")
+
+			model.eval()
+			with torch.no_grad():
+				acc = []
+				val_loss = 0
+				total_samples = 0
+				for inputs, labels in test_dataset:
+					outputs = model(inputs)
+					_, predicted = torch.max(outputs, dim=0)
+					if predicted == labels:
+						acc.append(1)
+					else:
+						acc.append(0)
+
+					loss = criterion(outputs, labels)
+					val_loss += loss.item() * len(inputs)
+					total_samples += len(inputs)
+
+				pred_acc = np.array(acc).mean()
+				if pred_acc > max_acc:
+					max_acc = pred_acc
+					max_acc_epoch = epoch + 1
+		    		# Save the checkpoint that has the highest validation accuracy
+					model_save = copy.deepcopy(model)
+		    	#print(f'val acc: {pred_acc}')
+
+				val_loss /= total_samples
+				if lowest_val_loss > val_loss:
+					lowest_val_loss = val_loss
+					lowest_val_loss_epoch = epoch + 1
+
+		    	#print(f'val loss: {val_loss:.4f}')
+
+			scheduler.step(val_loss)
+
+		print(f'Max acc: {max_acc} at {max_acc_epoch} epoch')
+		print(f'Lowest vaidation loss: {lowest_val_loss} at {lowest_val_loss_epoch} epoch')
+
+		# Save the best model to PATH
+		PATH = f'final/algorithm/model/model_{clean}_{pca}_{smote}_norm_option_{norm_data}.pt'
+		torch.save(model_save.state_dict(), PATH)
+		predict(model_save, test_dataset, y_test)
+
+if __name__ == "__main__":
+	main()
